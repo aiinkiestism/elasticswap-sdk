@@ -807,18 +807,17 @@ const internalBalancesBNCleaner = (_internalBalances) => {
 
 }
 
-// const wDiv = ( _a, _b) => {
-//   // cleanse input 
-//   const a = BigNumber(_a);
-//   const b = BigNumber(_b);
+const wDiv = ( _a, _b) => {
+  // cleanse input 
+  const a = BigNumber(_a);
+  const b = BigNumber(_b);
 
-//   const halfB = b.dividedBy(BigNumber(2)).dp(18, ROUND_DOWN);
-//   const numerator = a.plus(halfB);
-//   const answer = numerator.dividedBy(b).dp(18, ROUND_DOWN);
-//   return answer;
+  const halfB = b.dividedBy(BigNumber(2)).dp(18, ROUND_DOWN);
+  const numerator = a.plus(halfB);
+  const answer = numerator.dividedBy(b).dp(18, ROUND_DOWN);
+  return answer;  
+};
 
-   
-// };
 // const objectBNCleaner = (objectToBeCleaned) => {
 //   return Object.keys(objectToBeCleaned).map((key) => {
 //     let cleanedObj = {};
@@ -840,8 +839,9 @@ calculateAddTokenPairLiquidityQuantities,
 calculateBaseTokenQty,
 calculateQuoteTokenQty,
 calculateLiquidityTokenFees,
+wDiv,
 INSUFFICIENT_QTY,
-INSUFFICIENT_LIQUIDITY
+INSUFFICIENT_LIQUIDITY,
 
 
 }

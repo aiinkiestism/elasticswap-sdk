@@ -1,15 +1,19 @@
 /* eslint import/extensions: 0 */
 import chai, { expect } from 'chai';
 import mathLib from '../../src/utils/MathLib.js';
+import ethers from "ethers";
+import BigNumber from "bignumber.js";
 // import BigNumber from 'bignumber.js';
 
 
 // const { assert } = chai;
+const WAD = ethers.BigNumber.from(10).pow(18);
 const { 
   calculateQty,
   calculateQtyToReturnAfterFees,
   calculateLiquidityTokenQtyForSingleAssetEntry,
   calculateLiquidityTokenQtyForDoubleAssetEntry,
+  wDiv,
   INSUFFICIENT_QTY,
   INSUFFICIENT_LIQUIDITY } = mathLib;
 
@@ -107,7 +111,7 @@ describe("calculateLiquiditytokenQtyForDoubleAssetEntry", () => {
 });
 
 describe("calculateLiquidityTokenQtyForSingleAssetEntry", () => {
-  it.only("Should return the correct qty of liquidity tokens with a rebase down", async () => {
+  it("Should return the correct qty of liquidity tokens with a rebase down", async () => {
     // Scenario: We have 1000:5000 A:B or X:Y, a rebase down occurs (of 50 tokens)
     // and a user needs to 50 tokens in order to remove the decay
     const totalSupplyOfLiquidityTokens = 5000;
@@ -199,6 +203,47 @@ describe("calculateLiquidityTokenQtyForSingleAssetEntry", () => {
         tokenBDecay
       ).toNumber()
     ).to.equal(expectLiquidityTokens2);
+  });
+});
+
+describe("wDiv", () => {
+  it.only("Should return expected results", async () => {
+    const a = 25;
+    const b = 100;
+    expect(wDiv(a, b).toNumber()).to.equal(BigNumber(WAD.mul(a).div(b)).toNumber());
+
+    const c = 100;
+    const d = 25;
+    expect(wDiv(c, d)).to.equal(WAD.mul(c).div(d));
+
+    const e = 0;
+    const f = 2;
+    expect(await mathLib.wDiv(e, f)).to.equal(WAD.mul(e).div(f));
+  });
+
+  it("Should revert when dividing by zero", async () => {
+    const a = 25;
+    const b = 0;
+    await expect(mathLib.wDiv(a, b)).to.be.reverted;
+  });
+
+  it("Should round to nearest integer", async () => {
+    const a = 20;
+    const b = 33333;
+    // should round up, we add 1 to simulate
+    expect(await mathLib.wDiv(a, b)).to.equal(
+      ethers.BigNumber.from(10).pow(18).mul(a).div(b).add(1)
+    );
+
+    const c = 1;
+    const d = ethers.BigNumber.from("333333333333333333");
+    // 3.3333 rounds down to 3
+    expect(await mathLib.wDiv(c, d)).to.equal(3);
+
+    const e = 1;
+    const f = ethers.BigNumber.from("600000000000000000");
+    // 1.51 rounds up to 2.
+    expect(await mathLib.wDiv(e, f)).to.equal(2);
   });
 });
 
